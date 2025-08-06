@@ -1,0 +1,8 @@
+<!-- components/guide-tip/guide-tip.wxml -->
+<view class="guide-tip {{show ? 'show' : 'hide'}}">
+  <view class="tip-content">
+    <view class="tip-icon">{{icon}}</view>
+    <view class="tip-text">{{text}}</view>
+  </view>
+  <view class="close-btn" bindtap="onClose">✕</view>
+</view>

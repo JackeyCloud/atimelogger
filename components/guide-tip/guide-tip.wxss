@@ -1,0 +1,64 @@
+/* components/guide-tip/guide-tip.wxss */
+.guide-tip {
+  position: relative;
+  background-color: rgba(52, 152, 219, 0.95);
+  color: #ffffff;
+  padding: 16rpx 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  max-height: 120rpx; /* 设置最大高度 */
+}
+
+.show {
+  max-height: 120rpx;
+  opacity: 1;
+  margin-bottom: 10rpx;
+}
+
+.hide {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.tip-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.tip-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tip-text {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.close-btn {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  cursor: pointer;
+}

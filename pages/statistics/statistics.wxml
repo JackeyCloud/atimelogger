@@ -1,0 +1,63 @@
+<!-- pages/statistics/statistics.wxml -->
+<view class="container {{pageThemeClass}}">
+<view class="statistics-container">
+  <view class="time-range-selector">
+    <view class="range-item {{timeRange === 'day' ? 'active' : ''}}" bindtap="switchTimeRange" data-range="day">今天</view>
+    <view class="range-item {{timeRange === 'week' ? 'active' : ''}}" bindtap="switchTimeRange" data-range="week">本周</view>
+    <view class="range-item {{timeRange === 'month' ? 'active' : ''}}" bindtap="switchTimeRange" data-range="month">本月</view>
+    <view class="range-item {{timeRange === 'year' ? 'active' : ''}}" bindtap="switchTimeRange" data-range="year">今年</view>
+  </view>
+
+  <view class="chart-type-selector">
+    <view class="chart-type-item {{chartType === 'pie' ? 'active' : ''}}" bindtap="switchChartType" data-type="pie">饼图</view>
+    <view class="chart-type-item {{chartType === 'line' ? 'active' : ''}}" bindtap="switchChartType" data-type="line">趋势图</view>
+    <view class="chart-type-item {{chartType === 'bar' ? 'active' : ''}}" bindtap="switchChartType" data-type="bar">柱状图</view>
+  </view>
+
+  <!-- 加载中状态 -->
+  <block wx:if="{{loading}}">
+    <view class="loading-container">
+      <view class="loading"></view>
+      <view class="loading-text">加载中...</view>
+    </view>
+  </block>
+  <block wx:elif="{{!hasRecords}}">
+    <view class="empty-state">
+      <view class="empty-text">暂无记录数据</view>
+      <view class="empty-subtext">开始记录时间，这里将显示您的统计数据</view>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="chart-container">
+      <chart chart-type="{{chartType}}" chart-data="{{chartData}}" width="100%" height="400rpx"></chart>
+    </view>
+    
+    <view class="total-time-card">
+      <view class="total-time-label">{{timeRange === 'day' ? '今日' : timeRange === 'week' ? '本周' : timeRange === 'month' ? '本月' : '今年'}}总计时长</view>
+      <view class="total-time-value">{{totalTime}}</view>
+    </view>
+    
+    <view class="categories-stats">
+      <block wx:for="{{categoryData}}" wx:key="id">
+        <view class="category-stat-item">
+          <view class="category-info">
+          <view class="category-icon" style="background-color: {{item.color}}">
+              <text class="icon-text">{{item.icon}}</text>
+            </view>
+            <view class="category-details">
+              <text class="category-name">{{item.name}}</text>
+              <text class="category-duration">{{item.formattedDuration}}</text>
+            </view>
+          </view>
+          <view class="category-percentage">
+            <text class="percentage-text">{{item.percentage}}%</text>
+            <view class="percentage-bar-container">
+              <view class="percentage-bar" style="width: {{item.percentage}}%; background-color: {{item.color}}"></view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+</view>
+</view>

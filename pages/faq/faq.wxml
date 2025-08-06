@@ -1,0 +1,27 @@
+<!-- pages/faq/faq.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="title">常见问题解答</view>
+    <view class="subtitle">关于大骏极简时间记录的使用帮助</view>
+  </view>
+  
+  <view class="faq-list">
+    <block wx:for="{{faqList}}" wx:key="id">
+      <view class="faq-item {{item.expanded ? 'expanded' : ''}}" bindtap="toggleFaq" data-id="{{item.id}}">
+        <view class="faq-question">
+          <text class="question-text">{{item.question}}</text>
+          <view class="arrow {{item.expanded ? 'up' : 'down'}}"></view>
+        </view>
+        <view class="faq-answer {{item.expanded ? 'show' : ''}}">
+          <text class="answer-text">{{item.answer}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+  
+  <view class="contact-section">
+    <view class="contact-title">还有其他问题？</view>
+    <view class="contact-text">如果您有其他问题或建议，请通过以下方式联系我们：</view>
+    <button class="contact-button" bindtap="contactUs">联系我们</button>
+  </view>
+</view>

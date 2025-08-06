@@ -1,0 +1,145 @@
+/* pages/faq/faq.wxss */
+.container {
+  padding: 30rpx;
+  background-color: var(--background-color, #f5f7fa);
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-color, #333);
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: var(--text-secondary, #666);
+}
+
+.faq-list {
+  margin-bottom: 60rpx;
+}
+
+.faq-item {
+  background-color: var(--card-background, #fff);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow-sm, 0 2rpx 8rpx rgba(0, 0, 0, 0.05));
+  transition: all 0.3s ease;
+}
+
+.faq-item.expanded {
+  box-shadow: var(--shadow-md, 0 4rpx 12rpx rgba(0, 0, 0, 0.1));
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.question-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-color, #333);
+  flex: 1;
+}
+
+.arrow {
+  width: 30rpx;
+  height: 30rpx;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.arrow::before,
+.arrow::after {
+  content: '';
+  position: absolute;
+  background-color: var(--text-secondary, #666);
+  width: 16rpx;
+  height: 3rpx;
+  top: 50%;
+}
+
+.arrow::before {
+  left: 0;
+  transform: rotate(45deg);
+}
+
+.arrow::after {
+  right: 0;
+  transform: rotate(-45deg);
+}
+
+.arrow.up::before {
+  transform: rotate(-45deg);
+}
+
+.arrow.up::after {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-answer.show {
+  max-height: 1000rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid var(--border-color, #eee);
+}
+
+.answer-text {
+  font-size: 28rpx;
+  color: var(--text-secondary, #666);
+  line-height: 1.6;
+}
+
+.contact-section {
+  background-color: var(--card-background, #fff);
+  border-radius: 16rpx;
+  padding: 40rpx 30rpx;
+  text-align: center;
+  box-shadow: var(--shadow-sm, 0 2rpx 8rpx rgba(0, 0, 0, 0.05));
+}
+
+.contact-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text-color, #333);
+  margin-bottom: 20rpx;
+}
+
+.contact-text {
+  font-size: 28rpx;
+  color: var(--text-secondary, #666);
+  margin-bottom: 30rpx;
+}
+
+.contact-button {
+  background: linear-gradient(135deg, var(--primary-color, #4a6cf7), var(--primary-dark, #3a5bd9));
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 100rpx;
+  padding: 16rpx 40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(74, 108, 247, 0.3);
+  border: none;
+  width: 60%;
+}
+
+.contact-button:active {
+  transform: translateY(2rpx);
+  opacity: 0.9;
+}

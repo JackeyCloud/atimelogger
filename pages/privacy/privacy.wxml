@@ -1,0 +1,85 @@
+<!-- pages/privacy/privacy.wxml -->
+<view class="container">
+  <view class="privacy-container">
+    <view class="privacy-header">
+      <text class="privacy-title">隐私政策</text>
+      <text class="privacy-date">最后更新：2025年8月5日</text>
+    </view>
+    
+    <view class="privacy-content">
+      <text class="privacy-text">亲爱的用户：</text>
+      <text class="privacy-text">感谢您使用"大骏极简时间记录"小程序！我们非常重视您的个人隐私和数据安全。本隐私政策旨在帮助您了解我们如何收集、使用和保护您的信息。</text>
+      
+      <view class="privacy-section">
+        <text class="section-title">我们收集什么信息？</text>
+        <text class="privacy-text">我们承诺最小化数据收集原则：</text>
+        <text class="privacy-text">• 不收集任何个人身份信息（姓名、电话、邮箱等）</text>
+        <text class="privacy-text">• 不收集设备标识符或位置信息</text>
+        <text class="privacy-text">• 仅在您的设备本地存储以下数据：</text>
+        <text class="privacy-text">  - 时间记录数据（开始时间、结束时间、类别、备注）</text>
+        <text class="privacy-text">  - 自定义类别设置（名称、颜色、图标）</text>
+        <text class="privacy-text">  - 应用偏好设置（主题、预设时长等）</text>
+        <text class="privacy-text">• 不会将任何数据上传到远程服务器</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">数据存储在哪里？</text>
+        <text class="privacy-text">所有数据都存储在您的手机本地存储中（微信小程序沙盒环境），特点如下：</text>
+        <text class="privacy-text">• 数据仅在您的设备上，其他人无法访问</text>
+        <text class="privacy-text">• 卸载小程序或清除缓存将删除所有数据</text>
+        <text class="privacy-text">• 不同设备间数据不会自动同步</text>
+        <text class="privacy-text">• 您拥有数据的完全控制权</text>
+        <text class="privacy-text">• 可通过导出功能备份数据（仅发送给您指定的好友或保存在剪贴板）</text>
+        <text class="privacy-text">• 导出的数据文件由您自主管理和保护</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">我们如何保护您的数据？</text>
+        <text class="privacy-text">我们采用多重保护措施确保数据安全：</text>
+        <text class="privacy-text">• 使用微信小程序提供的安全存储机制</text>
+        <text class="privacy-text">• 数据加密存储在设备本地沙盒环境中</text>
+        <text class="privacy-text">• 绝不向任何第三方分享或出售用户数据</text>
+        <text class="privacy-text">• 不进行数据挖掘或用户行为分析</text>
+        <text class="privacy-text">• 提供完整的数据控制权限：</text>
+        <text class="privacy-text">  - 随时删除单条记录</text>
+        <text class="privacy-text">  - 一键清除所有数据</text>
+        <text class="privacy-text">  - 自由导出备份数据</text>
+        <text class="privacy-text">• 定期进行安全审查和代码审计</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">您的权利</text>
+        <text class="privacy-text">作为用户，您享有完整的数据权利：</text>
+        <text class="privacy-text">• 知情权：了解数据如何被收集、存储和使用</text>
+        <text class="privacy-text">• 访问权：随时查看历史记录、统计数据和设置</text>
+        <text class="privacy-text">• 修改权：编辑记录时间、类别、备注等信息</text>
+        <text class="privacy-text">• 删除权：删除单条记录或一键清除所有数据</text>
+        <text class="privacy-text">• 携带权：通过导出功能获取完整数据副本</text>
+        <text class="privacy-text">• 选择权：随时停止使用应用或卸载小程序</text>
+        <text class="privacy-text">• 限制权：自由设置数据收集和功能使用偏好</text>
+        <text class="privacy-text">• 反对权：对任何数据处理行为提出异议</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">儿童隐私</text>
+        <text class="privacy-text">我们的小程序适合所有年龄段的用户使用。由于我们不收集个人信息，因此不会特别收集儿童的个人信息。</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">隐私政策的变更</text>
+        <text class="privacy-text">我们可能会不时更新我们的隐私政策。任何变更都会在本页面上发布，并在必要时通过小程序通知您。</text>
+      </view>
+      
+      <view class="privacy-section">
+        <text class="section-title">联系我们</text>
+        <text class="privacy-text">如果您对隐私政策有任何疑问、建议或举报，请通过以下方式联系我们：</text>
+        <text class="privacy-text">• 电子邮件：1945000000@qq.com</text>
+        <text class="privacy-text">• 微信公众号：大骏的百宝箱</text>
+        <text class="privacy-text">• 微信号：ui1945</text>
+        <text class="privacy-text">我们将在收到您的联系后24小时内回复您的查询。</text>
+      </view>
+      
+      <text class="privacy-text privacy-conclusion">感谢您阅读我们的隐私政策。我们致力于保护您的隐私和数据安全，希望您能放心使用我们的小程序。</text>
+    </view>
+  </view>
+</view>

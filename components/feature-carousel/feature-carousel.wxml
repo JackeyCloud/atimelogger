@@ -1,0 +1,34 @@
+<!-- components/feature-carousel/feature-carousel.wxml -->
+<view class="feature-carousel-container {{show ? 'show' : 'hide'}}">
+  <view class="feature-carousel-mask" bindtap="onClose"></view>
+  
+  <view class="feature-carousel">
+    <view class="close-btn" bindtap="onClose">✕</view>
+    
+    <view class="carousel-content" animation="{{animationData}}" bindtouchstart="touchStart" bindtouchend="touchEnd">
+      <view class="feature-icon">{{features[currentIndex].icon}}</view>
+      <view class="feature-title">{{features[currentIndex].title}}</view>
+      <view class="feature-description">{{features[currentIndex].description}}</view>
+      <view class="feature-details">{{features[currentIndex].details}}</view>
+    </view>
+    
+    <view class="carousel-controls">
+      <view class="carousel-dots">
+        <block wx:for="{{features}}" wx:key="index">
+          <view class="carousel-dot {{currentIndex === index ? 'active' : ''}}" 
+                bindtap="goToSlide" 
+                data-index="{{index}}"></view>
+        </block>
+      </view>
+      
+      <view class="carousel-buttons">
+        <block wx:if="{{currentIndex < features.length - 1}}">
+          <view class="carousel-button next" bindtap="nextSlide">下一步</view>
+        </block>
+        <block wx:else>
+          <view class="carousel-button start" bindtap="onStart">开始使用</view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

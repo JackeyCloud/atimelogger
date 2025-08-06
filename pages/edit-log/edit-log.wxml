@@ -1,0 +1,101 @@
+<!-- pages/edit-log/edit-log.wxml -->
+<view class="container">
+  <block wx:if="{{loading}}">
+    <view class="loading-container">
+      <view class="loading"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </block>
+  
+  <block wx:else>
+    <view class="edit-form">
+      <!-- 类别选择 -->
+      <view class="form-group">
+        <text class="form-label">活动类别</text>
+        <picker mode="selector" range="{{categories}}" range-key="name" value="{{selectedCategoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-view">
+            <view class="category-display">
+              <view class="category-icon" style="background-color: {{categories[selectedCategoryId].color || '#3498db'}}">
+                <text class="icon-text">{{categories[selectedCategoryId].icon || '📝'}}</text>
+              </view>
+              <text class="category-name">{{categories[selectedCategoryId].name || '请选择类别'}}</text>
+            </view>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 时间选择器 -->
+      <view class="form-group">
+        <text class="form-label">时间范围</text>
+        <view class="time-range-selector">
+          <view class="time-range-display">
+            <view class="time-point start">
+              <view class="time-label">开始</view>
+              <view class="datetime-picker improved">
+                <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+                  <view class="date-picker">
+                    <text class="date-icon">📅</text>
+                    <text>{{startDate}}</text>
+                  </view>
+                </picker>
+                <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+                  <view class="time-picker">
+                    <text class="time-icon">🕒</text>
+                    <text>{{startTime}}</text>
+                  </view>
+                </picker>
+              </view>
+            </view>
+            
+            <view class="time-separator">
+              <view class="separator-line"></view>
+              <view class="duration-display">
+                <text>{{durationText}}</text>
+              </view>
+            </view>
+            
+            <view class="time-point end">
+              <view class="time-label">结束</view>
+              <view class="datetime-picker improved">
+                <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+                  <view class="date-picker">
+                    <text class="date-icon">📅</text>
+                    <text>{{endDate}}</text>
+                  </view>
+                </picker>
+                <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+                  <view class="time-picker">
+                    <text class="time-icon">🕒</text>
+                    <text>{{endTime}}</text>
+                  </view>
+                </picker>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 快速时间选择 -->
+          <view class="quick-time-options">
+            <view class="quick-option" bindtap="setQuickTime" data-option="15min">+15分钟</view>
+            <view class="quick-option" bindtap="setQuickTime" data-option="30min">+30分钟</view>
+            <view class="quick-option" bindtap="setQuickTime" data-option="1hour">+1小时</view>
+            <view class="quick-option" bindtap="setQuickTime" data-option="today">今天</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 备注 -->
+      <view class="form-group">
+        <text class="form-label">备注</text>
+        <textarea class="note-input" value="{{note}}" bindinput="onNoteInput" placeholder="添加备注（可选）" maxlength="200"></textarea>
+        <text class="note-counter">{{note.length}}/200</text>
+      </view>
+      
+      <!-- 操作按钮 -->
+      <view class="action-buttons">
+        <button class="save-button" bindtap="saveLog">保存修改</button>
+        <button class="delete-button" bindtap="deleteLog">删除记录</button>
+      </view>
+    </view>
+  </block>
+</view>

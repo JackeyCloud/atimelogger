@@ -1,0 +1,258 @@
+<!-- pages/logs/logs.wxml -->
+<view class="container {{pageThemeClass}}">
+  <!-- 编辑记录弹窗 -->
+  <view class="edit-modal" wx:if="{{showEditModal}}">
+    <view class="modal-mask" bindtap="closeEditModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">编辑记录</text>
+        <view class="close-btn" bindtap="closeEditModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-group">
+          <text class="form-label">活动类别</text>
+          <view class="category-selector">
+            <view class="current-category">
+              <text>当前选择：</text>
+              <view class="selected-category-indicator">
+                <block wx:for="{{categories}}" wx:key="id">
+                  <block wx:if="{{editingLog.categoryId === item.id}}">
+                    <view class="mini-category-icon" style="background-color: {{item.color}}">
+                      <text class="mini-icon-text">{{item.icon}}</text>
+                    </view>
+                    <text class="selected-category-name">{{item.name}}</text>
+                  </block>
+                </block>
+              </view>
+            </view>
+            <scroll-view scroll-x="true" class="categories-scroll" enhanced="true" show-scrollbar="false">
+              <view class="categories-list">
+                <block wx:for="{{categories}}" wx:key="id">
+                  <view class="category-item {{editingLog.categoryId === item.id ? 'selected' : ''}}" 
+                        bindtap="selectCategory" 
+                        data-id="{{item.id}}"
+                        hover-class="category-item-hover">
+                    <view class="category-icon" style="background-color: {{item.color}}">
+                      <text class="icon-text">{{item.icon}}</text>
+                      <view wx:if="{{editingLog.categoryId === item.id}}" class="check-mark">✓</view>
+                    </view>
+                    <text class="category-name">{{item.name}}</text>
+                  </view>
+                </block>
+              </view>
+            </scroll-view>
+          </view>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">开始时间</text>
+          <view class="enhanced-time-picker">
+            <view class="time-picker-left">
+              <text class="picker-label">日期</text>
+              <picker mode="multiSelector" range="{{startDateRange}}" range-key="label" value="{{startDateIndex}}" bindchange="onStartDateMultiChange">
+                <view class="date-picker-enhanced">
+                  <text class="date-icon">📅</text>
+                  <text class="date-text">{{startDateDisplay}}</text>
+                  <text class="picker-arrow">▼</text>
+                </view>
+              </picker>
+            </view>
+            <view class="time-picker-right">
+              <text class="picker-label">时间</text>
+              <picker mode="multiSelector" range="{{startTimeRange}}" range-key="label" value="{{startTimeIndex}}" bindchange="onStartTimeMultiChange">
+                <view class="time-picker-enhanced">
+                  <text class="time-icon">🕒</text>
+                  <text class="time-text">{{startTimeDisplay}}</text>
+                  <text class="picker-arrow">▼</text>
+                </view>
+              </picker>
+            </view>
+          </view>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">结束时间</text>
+          <view class="enhanced-time-picker">
+            <view class="time-picker-left">
+              <text class="picker-label">日期</text>
+              <picker mode="multiSelector" range="{{endDateRange}}" range-key="label" value="{{endDateIndex}}" bindchange="onEndDateMultiChange">
+                <view class="date-picker-enhanced">
+                  <text class="date-icon">📅</text>
+                  <text class="date-text">{{endDateDisplay}}</text>
+                  <text class="picker-arrow">▼</text>
+                </view>
+              </picker>
+            </view>
+            <view class="time-picker-right">
+              <text class="picker-label">时间</text>
+              <picker mode="multiSelector" range="{{endTimeRange}}" range-key="label" value="{{endTimeIndex}}" bindchange="onEndTimeMultiChange">
+                <view class="time-picker-enhanced">
+                  <text class="time-icon">🕒</text>
+                  <text class="time-text">{{endTimeDisplay}}</text>
+                  <text class="picker-arrow">▼</text>
+                </view>
+              </picker>
+            </view>
+          </view>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">持续时间</text>
+          <text class="time-display">{{currentLog.formattedDuration}}</text>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">备注</text>
+          <textarea class="note-input" 
+                    placeholder="添加备注..." 
+                    value="{{currentLog.note}}" 
+                    bindinput="inputNote"></textarea>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="delete-btn" bindtap="deleteLog">删除</button>
+        <button class="save-btn" bindtap="saveLog">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="logs-container">
+    <!-- 搜索和筛选区域 -->
+    <view class="search-filter-container">
+      <view class="search-box">
+        <input class="search-input" placeholder="搜索记录..." bindinput="onSearchInput" value="{{searchText}}" />
+        <view class="search-icon" bindtap="onSearch">🔍</view>
+        <view class="clear-icon" bindtap="clearSearch" wx:if="{{searchText}}">×</view>
+      </view>
+      
+      <view class="filter-options">
+        <view class="filter-button {{showFilters ? 'active' : ''}}" bindtap="toggleFilters">
+          筛选 <text class="filter-icon">{{showFilters ? '▲' : '▼'}}</text>
+          <text wx:if="{{activeFiltersCount > 0}}" class="filter-badge">{{activeFiltersCount}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 展开的筛选面板 -->
+    <view class="filter-panel" wx:if="{{showFilters}}">
+      <view class="filter-section">
+        <text class="filter-section-title">按类别筛选</text>
+        <view class="category-filter-list">
+          <view class="category-filter-item {{selectedCategoryId === 'all' ? 'selected' : ''}}" 
+                bindtap="filterByCategory" data-id="all">
+            <text>全部</text>
+          </view>
+          <block wx:for="{{categories}}" wx:key="id">
+            <view class="category-filter-item {{selectedCategoryId === item.id ? 'selected' : ''}}" 
+                  bindtap="filterByCategory" data-id="{{item.id}}">
+              <view class="mini-category-icon" style="background-color: {{item.color}}">
+                <text class="mini-icon-text">{{item.icon}}</text>
+              </view>
+              <text>{{item.name}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+      
+      <view class="filter-section">
+        <text class="filter-section-title">按时间范围筛选</text>
+        <view class="date-filter-list">
+          <view class="date-filter-item {{dateFilter === 'all' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="all">
+            <text>全部时间</text>
+          </view>
+          <view class="date-filter-item {{dateFilter === 'today' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="today">
+            <text>今天</text>
+          </view>
+          <view class="date-filter-item {{dateFilter === 'yesterday' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="yesterday">
+            <text>昨天</text>
+          </view>
+          <view class="date-filter-item {{dateFilter === 'thisWeek' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="thisWeek">
+            <text>本周</text>
+          </view>
+          <view class="date-filter-item {{dateFilter === 'thisMonth' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="thisMonth">
+            <text>本月</text>
+          </view>
+          <view class="date-filter-item {{dateFilter === 'custom' ? 'selected' : ''}}" 
+                bindtap="filterByDate" data-filter="custom">
+            <text>自定义...</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="filter-section" wx:if="{{dateFilter === 'custom'}}">
+        <view class="custom-date-range">
+          <view class="date-picker-item">
+            <text>开始日期:</text>
+            <picker mode="date" value="{{customStartDate}}" bindchange="onStartDateChange">
+              <view class="picker-value">{{customStartDate || '选择日期'}}</view>
+            </picker>
+          </view>
+          <view class="date-picker-item">
+            <text>结束日期:</text>
+            <picker mode="date" value="{{customEndDate}}" bindchange="onEndDateChange">
+              <view class="picker-value">{{customEndDate || '选择日期'}}</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+      
+      <view class="filter-actions">
+        <button class="reset-filters-btn" bindtap="resetFilters">重置筛选</button>
+        <button class="apply-filters-btn" bindtap="applyFilters">应用筛选</button>
+      </view>
+    </view>
+    
+    <block wx:if="{{loading}}">
+      <view class="loading-container">
+        <view class="loading"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+    </block>
+    
+    <block wx:elif="{{isEmpty}}">
+      <view class="empty-state">
+        <text class="empty-text">暂无记录</text>
+        <text class="empty-subtext">开始记录你的时间吧</text>
+      </view>
+    </block>
+    
+    <block wx:else>
+      <view class="date-groups">
+        <block wx:for="{{dateGroups}}" wx:key="date" wx:for-item="group">
+          <view class="date-group">
+            <view class="date-header">
+              <text class="date-text">{{group.date}}</text>
+              <text class="day-text">{{group.dayOfWeek}}</text>
+            </view>
+            
+            <view class="logs-list">
+              <block wx:for="{{group.logs}}" wx:key="id">
+                <view class="log-item" bindtap="editLog" data-id="{{item.id}}">
+                  <view class="log-content">
+                    <view class="category-icon" style="background-color: {{item.category.color}}">
+                      <text class="icon-text">{{item.category.icon}}</text>
+                    </view>
+                    
+                    <view class="log-details">
+                      <text class="log-title">{{item.category.name}}</text>
+                      <text class="log-time">{{item.formattedStartTime}} - {{item.formattedEndTime}}</text>
+                      <text class="log-duration">{{item.formattedDuration}}</text>
+                      <text wx:if="{{item.note}}" class="log-note">{{item.note}}</text>
+                    </view>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </view>
+        </block>
+      </view>
+    </block>
+  </view>
+</view>

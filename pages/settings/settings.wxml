@@ -1,0 +1,210 @@
+<!-- pages/settings/settings.wxml -->
+<view class="container">
+  <view class="settings-container">
+    <!-- 关于 -->
+    <view class="settings-section about-section">
+      <view class="app-info">
+        <view class="app-logo-name">
+          <view class="app-logo">⏱️</view>
+          <view class="app-title">
+            <text class="app-name">大骏极简时间记录</text>
+            <text class="app-version">v1.0.0</text>
+          </view>
+        </view>
+      <view class="app-actions">
+        <view class="action-button" bindtap="navigateToPrivacy">隐私政策</view>
+        <view class="action-button" bindtap="navigateToFAQ">常见问题</view>
+      </view>
+      </view>
+    </view>
+    
+    <!-- 类别管理 -->
+    <view class="settings-section">
+      <view class="section-header">
+        <view class="section-title">类别管理</view>
+        <view class="section-actions">
+          <view class="add-button" bindtap="showAddCategory">
+            <text class="add-icon">+</text>
+            <text class="add-text">添加</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="categories-list {{sortBy === 'custom' ? 'sortable' : ''}}">
+        <block wx:if="{{filteredCategories.length === 0}}">
+          <view class="empty-categories">
+            <text>暂无类别，点击"添加"创建新类别</text>
+          </view>
+        </block>
+        
+        <block wx:for="{{filteredCategories}}" wx:key="id">
+        <view class="category-item" 
+                data-id="{{item.id}}" 
+                data-index="{{index}}">
+            <view class="category-info">
+              <view class="category-icon" style="background-color: {{item.color}}">
+                <text class="icon-text">{{item.icon}}</text>
+              </view>
+              <view class="category-details">
+                <text class="category-name">{{item.name}}</text>
+                <text class="category-usage" wx:if="{{item.usageCount}}">使用次数: {{item.usageCount}}</text>
+              </view>
+            </view>
+            
+            <view class="category-actions">
+              <view class="action-button edit" bindtap="editCategory" data-id="{{item.id}}">
+                <text class="action-text">编辑</text>
+              </view>
+              <view class="action-button delete" bindtap="deleteCategory" data-id="{{item.id}}">
+                <text class="action-text">删除</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+    
+    <!-- 数据管理 -->
+    <view class="settings-section">
+      <view class="section-title">数据管理</view>
+      <view class="data-management-buttons">
+        <view class="action-button export" bindtap="showExportOptions">
+          <text>导出数据</text>
+        </view>
+        <view class="action-button import" bindtap="showImportOptions">
+          <text>导入数据</text>
+        </view>
+      </view>
+      <view class="danger-button" bindtap="clearAllData">
+        <text>清除所有数据</text>
+      </view>
+    </view>
+    
+</view>
+
+  <!-- 导出数据选项模态框 -->
+  <view class="modal" wx:if="{{showExportModal}}">
+    <view class="modal-mask" bindtap="closeExportModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择要导出的数据</text>
+        <view class="close-button" bindtap="closeExportModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="checkbox-group">
+          <view class="checkbox-item" bindtap="toggleExportOption" data-option="categories">
+            <view class="checkbox {{exportOptions.categories ? 'checked' : ''}}"></view>
+            <text>类别数据</text>
+          </view>
+          <view class="checkbox-item" bindtap="toggleExportOption" data-option="timeRecords">
+            <view class="checkbox {{exportOptions.timeRecords ? 'checked' : ''}}"></view>
+            <text>时间记录</text>
+          </view>
+          <view class="checkbox-item" bindtap="toggleExportOption" data-option="groups">
+            <view class="checkbox {{exportOptions.groups ? 'checked' : ''}}"></view>
+            <text>分组数据</text>
+          </view>
+          <view class="checkbox-item" bindtap="toggleExportOption" data-option="settings">
+            <view class="checkbox {{exportOptions.settings ? 'checked' : ''}}"></view>
+            <text>应用设置</text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="cancel-button" bindtap="closeExportModal">取消</button>
+        <button class="save-button" bindtap="exportSelectedData">导出</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导入数据选项模态框 -->
+  <view class="modal" wx:if="{{showImportModal}}">
+    <view class="modal-mask" bindtap="closeImportModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">导入数据</text>
+        <view class="close-button" bindtap="closeImportModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="import-message">
+          <text>选择数据来源</text>
+        </view>
+        <view class="import-tips">
+          <text>支持从聊天记录选择文件或从剪贴板导入数据</text>
+        </view>
+        <button class="btn-file" bindtap="chooseImportFile">选择数据来源</button>
+        
+        <view class="import-status" wx:if="{{importFilePath && importFilePath !== 'clipboard'}}">
+          <text class="status-text">✓ 已选择文件：{{importFileName}}</text>
+        </view>
+        
+        <view class="import-status" wx:if="{{importFilePath === 'clipboard'}}">
+          <text class="status-text">✓ 已从剪贴板获取数据</text>
+        </view>
+        
+        <view class="import-warning" wx:if="{{showImportWarning}}">
+          <view class="warning-icon">⚠️</view>
+          <view class="warning-content">
+            <text class="warning-title">重要提醒</text>
+            <text class="warning-text">导入数据将完全覆盖现有的所有数据（包括类别、记录、分组等），此操作无法撤销。强烈建议先导出当前数据做备份。</text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="cancel-button" bindtap="closeImportModal">取消</button>
+        <button class="save-button" bindtap="confirmImport" wx:if="{{importFilePath}}">确认导入</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加/编辑类别模态框 -->
+  <view class="modal" wx:if="{{showAddCategoryModal}}">
+    <view class="modal-mask" bindtap="closeModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{editingCategory ? '编辑类别' : '添加类别'}}</text>
+        <view class="close-button" bindtap="closeModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="input-group">
+          <text class="input-label">名称</text>
+          <input class="input-field" value="{{newCategory.name}}" bindinput="inputCategoryName" placeholder="输入类别名称" />
+        </view>
+        
+        <view class="input-group">
+          <text class="input-label">颜色</text>
+          <view class="color-options">
+            <block wx:for="{{colorOptions}}" wx:key="*this">
+              <view class="color-option {{newCategory.color === item ? 'selected' : ''}}" 
+                style="background-color: {{item}}" 
+                bindtap="selectColor" 
+                data-color="{{item}}">
+              </view>
+            </block>
+          </view>
+        </view>
+        
+        <view class="input-group">
+          <text class="input-label">图标</text>
+          <view class="icon-options">
+            <block wx:for="{{iconOptions}}" wx:key="*this">
+              <view class="icon-option {{newCategory.icon === item ? 'selected' : ''}}" 
+                bindtap="selectIcon" 
+                data-icon="{{item}}">
+                <text>{{item}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+        
+        <!-- 已删除分组选择功能 -->
+      </view>
+      
+      <view class="modal-footer">
+        <button class="cancel-button" bindtap="closeModal">取消</button>
+        <button class="save-button" bindtap="saveCategory">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

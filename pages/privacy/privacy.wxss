@@ -1,0 +1,56 @@
+/* pages/privacy/privacy.wxss */
+.container {
+  padding: 0;
+}
+
+.privacy-container {
+  padding: 30rpx;
+}
+
+.privacy-header {
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.privacy-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--text-color);
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.privacy-date {
+  font-size: 24rpx;
+  color: var(--light-text);
+}
+
+.privacy-content {
+  font-size: 28rpx;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+.privacy-text {
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.privacy-section {
+  margin: 40rpx 0;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: var(--text-color);
+  display: block;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.privacy-conclusion {
+  margin-top: 40rpx;
+  font-weight: 500;
+}
