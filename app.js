@@ -22,13 +22,13 @@ App({
   
   onShow: function() {
     // 小程序从后台切回前台时
-    // 如果首页已加载且有活动记录，通知首页立即更新计时显示
+    // 如果首页已加载且有活动记录且未暂停，通知首页立即更新计时显示
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];
     
     if (currentPage && currentPage.route === 'pages/index/index') {
-      if (currentPage.data.activeRecord && currentPage.updateTimerDisplay) {
-        // 立即更新时间显示
+      if (currentPage.data.activeRecord && !currentPage.data.isPaused && currentPage.updateTimerDisplay) {
+        // 立即更新时间显示（只在非暂停状态下）
         currentPage.updateTimerDisplay();
       }
     }

@@ -187,8 +187,22 @@
         
         <view class="input-group">
           <text class="input-label">图标</text>
+          
+          <!-- 图标分类选择器 -->
+          <view class="icon-category-tabs">
+            <block wx:for="{{iconCategories}}" wx:key="name" wx:for-index="index">
+              <view class="icon-category-tab {{selectedIconCategory === index ? 'active' : ''}}" 
+                bindtap="switchIconCategory" 
+                data-index="{{index}}">
+                <text class="category-tab-icon">{{item.icon}}</text>
+                <text class="category-tab-name">{{item.name}}</text>
+              </view>
+            </block>
+          </view>
+          
+          <!-- 当前分类的图标选项 -->
           <view class="icon-options">
-            <block wx:for="{{iconOptions}}" wx:key="*this">
+            <block wx:for="{{iconCategories[selectedIconCategory].icons}}" wx:key="*this">
               <view class="icon-option {{newCategory.icon === item ? 'selected' : ''}}" 
                 bindtap="selectIcon" 
                 data-icon="{{item}}">

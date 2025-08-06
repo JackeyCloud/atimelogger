@@ -34,8 +34,22 @@
         
         <view class="input-group">
           <text class="input-label">图标</text>
+          
+          <!-- 图标分类选择器 -->
+          <view class="icon-category-tabs">
+            <block wx:for="{{iconCategories}}" wx:key="name" wx:for-index="index">
+              <view class="icon-category-tab {{selectedIconCategory === index ? 'active' : ''}}" 
+                bindtap="switchIconCategory" 
+                data-index="{{index}}">
+                <text class="category-tab-icon">{{item.icon}}</text>
+                <text class="category-tab-name">{{item.name}}</text>
+              </view>
+            </block>
+          </view>
+          
+          <!-- 当前分类的图标选项 -->
           <view class="icon-options">
-            <block wx:for="{{iconOptions}}" wx:key="*this">
+            <block wx:for="{{iconCategories[selectedIconCategory].icons}}" wx:key="*this">
               <view class="icon-option {{newCategory.icon === item ? 'selected' : ''}}" 
                 bindtap="selectIcon" 
                 data-icon="{{item}}">
@@ -80,10 +94,16 @@
   
   <!-- 类别选择网格 -->
   <view class="categories-container">
-    <!-- 预设时长开关 -->
-    <view class="preset-toggle-container">
-      <text class="preset-toggle-label">预设时长</text>
-      <switch class="preset-toggle-switch" checked="{{usePresetDuration}}" bindchange="toggleUsePresetDuration"></switch>
+    <!-- 预设功能开关 -->
+    <view class="preset-toggles-container">
+      <view class="preset-toggle-item" bindtap="debugPresetDurationStatus">
+        <text class="preset-toggle-label">预设时长</text>
+        <switch class="preset-toggle-switch" checked="{{usePresetDuration}}" bindchange="toggleUsePresetDuration" catchtap="preventBubble"></switch>
+      </view>
+      <view class="preset-toggle-item">
+        <text class="preset-toggle-label">预设备注</text>
+        <switch class="preset-toggle-switch" checked="{{usePresetNote}}" bindchange="toggleUsePresetNote"></switch>
+      </view>
     </view>
     
     <!-- 预设时长选择器 -->
@@ -113,8 +133,8 @@
           <text class="preset-value">15分钟</text>
           <text class="preset-desc">休息时间</text>
         </view>
-        <view class="preset-option custom" bindtap="showCustomDurationInput">
-          <text class="preset-value">自定义</text>
+        <view class="preset-option custom {{isCustomSelected ? 'selected' : ''}}" bindtap="showCustomDurationInput">
+          <text class="preset-value">{{customDisplayText}}</text>
           <text class="preset-desc">分钟</text>
         </view>
       </view>
@@ -125,13 +145,27 @@
       <button class="start-preset-button" bindtap="startPresetTimer">开始计时</button>
     </view>
     
-    <view class="categories-grid">
+    <view class="categories-grid {{isDragging ? 'dragging-mode' : ''}}">
       <block wx:for="{{categories}}" wx:key="id">
-        <view class="category-item" bindtap="{{usePresetDuration ? 'showPresetForCategory' : 'startRecord'}}" data-id="{{item.id}}">
+        <view 
+          class="category-item {{isDragging && draggedIndex === index ? 'dragging' : ''}} {{isDragging && dragOverIndex === index ? 'drag-over' : ''}}" 
+          bindtap="{{isDragging ? 'onCategoryTapInDragMode' : (usePresetDuration ? 'showPresetForCategory' : 'startRecord')}}" 
+          bindlongpress="onCategoryLongPress"
+          bindtouchstart="onCategoryTouchStart"
+          bindtouchmove="onCategoryTouchMove"
+          bindtouchend="onCategoryTouchEnd"
+          data-id="{{item.id}}"
+          data-index="{{index}}">
+          
           <view class="category-icon" style="background-color: {{item.color}}">
             <text class="icon-text">{{item.icon}}</text>
           </view>
           <text class="category-name">{{item.name}}</text>
+          
+          <!-- 拖拽模式下的视觉指示器 -->
+          <view class="drag-indicator" wx:if="{{isDragging && draggedIndex === index}}">
+            <text class="drag-icon">⋮⋮</text>
+          </view>
         </view>
       </block>
       
@@ -142,11 +176,49 @@
         <text class="category-name">添加</text>
       </view>
     </view>
+    
+    <!-- 拖拽排序模式下的操作提示 -->
+    <view class="drag-sort-tips" wx:if="{{isDragging}}">
+      <text class="drag-tips-text">点击其他类别位置进行交换</text>
+      <button class="exit-drag-button" bindtap="cancelDragSort">完成</button>
+    </view>
   </view>
   <!-- 提示信息 -->
   <view class="tips-container" wx:if="{{!activeRecord}}">
     <view class="tips">
       <text class="tips-text">点击上方类别开始记录时间</text>
+    </view>
+  </view>
+
+  <!-- 预设备注输入框 -->
+  <view class="modal {{showPresetNoteModal ? 'show' : ''}}" wx:if="{{showPresetNoteModal}}">
+    <view class="modal-mask" bindtap="hidePresetNoteModal"></view>
+    <view class="modal-content preset-note-modal">
+      <view class="modal-header">
+        <text class="modal-title">添加备注</text>
+        <view class="close-button" bindtap="hidePresetNoteModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="note-input-group">
+          <text class="note-input-label">备注</text>
+          <textarea 
+            class="note-textarea" 
+            value="{{presetNote}}" 
+            bindinput="onPresetNoteInput" 
+            placeholder="请输入本次记录的备注信息..."
+            maxlength="200"
+            auto-height
+            show-confirm-bar="{{false}}">
+          </textarea>
+          <text class="note-char-count">{{presetNote.length}}/200</text>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="cancel-button" bindtap="hidePresetNoteModal">取消</button>
+        <button class="confirm-button" bindtap="confirmPresetNote">开始记录</button>
+      </view>
     </view>
   </view>
 </view>

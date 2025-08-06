@@ -129,6 +129,28 @@ const updateCategory = function(id, updatedData) {
 };
 
 /**
+ * 更新类别排序
+ * @param {Array} orderedCategories 排序后的类别数组
+ * @returns {boolean} 是否更新成功
+ */
+const updateCategoriesOrder = function(orderedCategories) {
+  try {
+    // 保存类别数据
+    wx.setStorageSync(STORAGE_KEYS.CATEGORIES, orderedCategories);
+    
+    // 更新排序数组
+    const categoryOrder = orderedCategories.map(category => category.id);
+    wx.setStorageSync(STORAGE_KEYS.CATEGORY_ORDER, categoryOrder);
+    
+    console.log('类别排序已更新:', categoryOrder);
+    return true;
+  } catch (error) {
+    console.error('更新类别排序失败:', error);
+    return false;
+  }
+};
+
+/**
  * 删除类别
  * @param {string} id 类别ID
  * @returns {boolean} 是否删除成功
@@ -211,10 +233,14 @@ const getActiveRecord = function() {
   }
   
   // 添加格式化的时间
+  const accumulatedTime = activeRecord.accumulatedTime || 0;
+  const currentSessionTime = Date.now() - activeRecord.startTime;
+  const totalDuration = accumulatedTime + currentSessionTime;
+  
   return {
     ...activeRecord,
     formattedStartTime: util.formatClock(new Date(activeRecord.startTime)),
-    duration: Date.now() - (activeRecord.pausedDuration || 0) - activeRecord.startTime,
+    duration: totalDuration,
     isPaused: false
   };
 };
@@ -231,6 +257,7 @@ const getPausedRecord = function() {
   }
   
   // 添加格式化的时间和暂停状态
+  // duration 已经在暂停时计算并保存了，直接使用
   return {
     ...pausedRecord,
     formattedStartTime: util.formatClock(new Date(pausedRecord.startTime)),
@@ -258,7 +285,8 @@ const startRecord = function(category) {
     category: category,
     startTime: now,
     endTime: null,
-    note: ''
+    note: '',
+    accumulatedTime: 0  // 初始化累计时间为0
   };
   
   // 保存为活动记录
@@ -289,22 +317,59 @@ const stopRecord = function(id) {
     return null;
   }
   
-  // 更新记录的结束时间
   const now = Date.now();
-  logs[index].endTime = now;
+  let endTime = now;
+  let finalDuration = now - logs[index].startTime;
+  
+  // 检查是否是暂停状态的记录
+  const pausedRecord = getPausedRecord();
+  if (pausedRecord && pausedRecord.id === id) {
+    // 如果是暂停状态，使用暂停时计算的持续时间
+    finalDuration = pausedRecord.duration;
+    endTime = pausedRecord.startTime + finalDuration;
+    
+    // 清除暂停记录
+    wx.removeStorageSync(STORAGE_KEYS.PAUSED_RECORD);
+    
+    console.log('停止暂停记录:', {
+      id: id,
+      pausedDuration: pausedRecord.duration,
+      calculatedEndTime: endTime
+    });
+  } else {
+    // 如果是活动状态，需要考虑累积时间
+    const activeRecord = getActiveRecord();
+    if (activeRecord && activeRecord.id === id) {
+      const accumulatedTime = activeRecord.accumulatedTime || 0;
+      const currentSessionTime = now - activeRecord.startTime;
+      finalDuration = accumulatedTime + currentSessionTime;
+      endTime = logs[index].startTime + finalDuration;
+      
+      console.log('停止活动记录:', {
+        id: id,
+        accumulatedTime: accumulatedTime,
+        currentSessionTime: currentSessionTime,
+        finalDuration: finalDuration
+      });
+    }
+    
+    // 清除活动记录
+    wx.removeStorageSync(STORAGE_KEYS.ACTIVE_RECORD);
+  }
+  
+  // 更新记录的结束时间和状态
+  logs[index].endTime = endTime;
+  logs[index].isPaused = false; // 确保清除暂停状态
   
   // 保存更新后的记录
   wx.setStorageSync(STORAGE_KEYS.LOGS, logs);
-  
-  // 清除活动记录
-  wx.removeStorageSync(STORAGE_KEYS.ACTIVE_RECORD);
   
   // 返回更新后的记录
   return {
     ...logs[index],
     formattedStartTime: util.formatClock(new Date(logs[index].startTime)),
-    formattedEndTime: util.formatClock(new Date(now)),
-    formattedDuration: util.formatDuration(now - logs[index].startTime)
+    formattedEndTime: util.formatClock(new Date(endTime)),
+    formattedDuration: util.formatDuration(finalDuration)
   };
 };
 
@@ -337,6 +402,16 @@ const updateLog = function(id, updatedData) {
   wx.setStorageSync(STORAGE_KEYS.LOGS, logs);
   
   return logs[index];
+};
+
+/**
+ * 更新记录备注
+ * @param {string} id 记录ID
+ * @param {string} note 备注内容
+ * @returns {Object|null} 更新后的记录对象，如果不存在则返回null
+ */
+const updateRecordNote = function(id, note) {
+  return updateLog(id, { note: note });
 };
 
 /**
@@ -396,16 +471,18 @@ const pauseRecord = function(id) {
     return null;
   }
   
-  // 计算已经记录的时间
+  // 计算已经记录的时间 - 使用累计时间模式
   const now = Date.now();
-  const elapsedTime = now - activeRecord.startTime;
-  const pausedDuration = activeRecord.pausedDuration || 0;
+  const accumulatedTime = activeRecord.accumulatedTime || 0;
+  const currentSessionTime = now - activeRecord.startTime;
+  // 计算到暂停时刻的总有效时间
+  const effectiveTime = accumulatedTime + currentSessionTime;
   
-  // 更新记录，添加暂停时间和总暂停时长
+  // 更新记录，添加暂停时间
   const updatedRecord = {
     ...activeRecord,
     pauseTime: now,
-    pausedDuration: pausedDuration,
+    duration: effectiveTime, // 保存计算出的有效时间
     isPaused: true
   };
   
@@ -419,7 +496,6 @@ const pauseRecord = function(id) {
   logs[index] = {
     ...logs[index],
     pauseTime: now,
-    pausedDuration: pausedDuration,
     isPaused: true
   };
   wx.setStorageSync(STORAGE_KEYS.LOGS, logs);
@@ -428,7 +504,7 @@ const pauseRecord = function(id) {
     ...updatedRecord,
     formattedStartTime: util.formatClock(new Date(updatedRecord.startTime)),
     formattedPauseTime: util.formatClock(new Date(now)),
-    duration: elapsedTime - pausedDuration
+    duration: effectiveTime
   };
 };
 
@@ -450,18 +526,19 @@ const resumeRecord = function() {
     return null;
   }
   
-  // 计算暂停的时长
+  // 恢复时重新设计：重置startTime，保留暂停前的累计时间
   const now = Date.now();
-  const pauseDuration = now - pausedRecord.pauseTime;
-  const totalPausedDuration = (pausedRecord.pausedDuration || 0) + pauseDuration;
+  const accumulatedTime = pausedRecord.duration || 0; // 暂停前的累计时间
   
-  // 更新记录，移除暂停状态，更新总暂停时长
+  // 更新记录：重置开始时间，清除暂停相关字段，保存累计时间
   const updatedRecord = {
     ...pausedRecord,
-    pausedDuration: totalPausedDuration,
+    startTime: now, // 重新设置开始时间为当前时间
+    accumulatedTime: accumulatedTime, // 保存暂停前的累计时间
     isPaused: false
   };
   delete updatedRecord.pauseTime;
+  delete updatedRecord.duration; // 移除固定的duration，恢复后需要动态计算
   
   // 保存为活动记录
   wx.setStorageSync(STORAGE_KEYS.ACTIVE_RECORD, updatedRecord);
@@ -472,7 +549,8 @@ const resumeRecord = function() {
   // 更新日志中的记录
   logs[index] = {
     ...logs[index],
-    pausedDuration: totalPausedDuration,
+    startTime: now, // 更新日志中的开始时间
+    accumulatedTime: accumulatedTime,
     isPaused: false
   };
   delete logs[index].pauseTime;
@@ -480,8 +558,8 @@ const resumeRecord = function() {
   
   return {
     ...updatedRecord,
-    formattedStartTime: util.formatClock(new Date(updatedRecord.startTime)),
-    duration: now - updatedRecord.startTime - totalPausedDuration
+    formattedStartTime: util.formatClock(new Date(now))
+    // 不返回duration字段，强制使用动态计算
   };
 };
 
@@ -850,23 +928,56 @@ const importAllData = function(data) {
   }
 };
 
+/**
+ * 更新活动记录
+ * @param {Object} updatedRecord 更新的记录对象
+ * @returns {Object} 更新后的记录对象
+ */
+const updateActiveRecord = function(updatedRecord) {
+  if (!updatedRecord) {
+    return null;
+  }
+  
+  // 保存到活动记录存储
+  wx.setStorageSync(STORAGE_KEYS.ACTIVE_RECORD, updatedRecord);
+  
+  // 同时更新日志中的对应记录
+  const logs = getLogs();
+  const index = logs.findIndex(log => log.id === updatedRecord.id);
+  
+  if (index !== -1) {
+    // 更新日志中的记录（但不更新endTime，因为记录还在进行中）
+    logs[index] = {
+      ...logs[index],
+      ...updatedRecord,
+      endTime: null // 确保endTime保持为null，表示记录仍在进行
+    };
+    wx.setStorageSync(STORAGE_KEYS.LOGS, logs);
+  }
+  
+  return updatedRecord;
+};
+
 module.exports = {
   init,
   getCategories,
   getCategoryById,
   addCategory,
   updateCategory,
+  updateCategoriesOrder,
   deleteCategory,
   getLogs,
   getLogsByTimeRange,
   getLogById,
   getActiveRecord,
+  updateActiveRecord,
   getPausedRecord,
   startRecord,
   stopRecord,
   pauseRecord,
   resumeRecord,
   updateLog,
+  updateRecordNote,
   deleteLog,
   clearAllData,
   getCategoryGroups,

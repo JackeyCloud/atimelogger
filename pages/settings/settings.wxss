@@ -578,10 +578,58 @@
   transition: all 0.2s ease;
 }
 
+/* 图标分类选择器 */
+.icon-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  background-color: var(--input-background);
+  padding: 8rpx;
+}
+
+.icon-category-tab {
+  flex: 0 0 calc(20% - 8rpx); /* 每行5个，20%宽度 */
+  min-width: 120rpx; /* 最小宽度确保文字显示 */
+  height: 80rpx; /* 增加高度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  margin: 4rpx;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.icon-category-tab.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.category-tab-icon {
+  font-size: 28rpx; /* 增大图标 */
+  line-height: 1;
+  margin-bottom: 4rpx; /* 增加间距 */
+}
+
+.category-tab-name {
+  font-size: 22rpx; /* 增大字体 */
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 4rpx; /* 增加左右内边距 */
+}
+
 .icon-options {
   display: flex;
   flex-wrap: wrap;
   margin: 0 -10rpx;
+  max-height: 300rpx;
+  overflow-y: auto;
 }
 
 .icon-option {

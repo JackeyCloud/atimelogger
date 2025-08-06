@@ -48,7 +48,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "3.9.0",
   "appid": "wx8383458c9fd26b1c",
   "projectname": "大骏极简时间记录",
   "isGameTourist": false,

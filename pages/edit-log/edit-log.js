@@ -13,7 +13,43 @@ Page({
     endDate: '',
     endTime: '',
     durationText: '计算中...',
-    loading: true
+    loading: true,
+    minDate: '', // 最小可选日期
+    maxDate: '', // 最大可选日期（今天）
+    maxTime: '', // 最大可选时间（当前时间，仅当选择今天时）
+    startMaxTime: '23:59', // 开始时间的最大值
+    endMaxTime: '23:59'    // 结束时间的最大值
+  },
+
+  // 检查是否为未来日期
+  isFutureDate: function(dateString) {
+    console.log('检查日期:', dateString);
+    
+    const selectedDate = new Date(dateString + ' 00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 重置时间到当天开始
+    
+    console.log('选择的日期:', selectedDate);
+    console.log('今天日期:', today);
+    console.log('是否为未来:', selectedDate > today);
+    
+    return selectedDate > today;
+  },
+  
+  // 检查是否为未来时间（仅在选择今天时使用）
+  isFutureTime: function(timeString) {
+    console.log('检查时间:', timeString);
+    
+    const now = new Date();
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const selectedTime = new Date();
+    selectedTime.setHours(hours, minutes, 0, 0);
+    
+    console.log('选择的时间:', selectedTime);
+    console.log('当前时间:', now);
+    console.log('是否为未来时间:', selectedTime > now);
+    
+    return selectedTime > now;
   },
 
   onLoad: function(options) {
@@ -27,6 +63,9 @@ Page({
       return;
     }
 
+    // 设置最大日期和时间（当前时间）
+    this.setMaxDateTime();
+    
     this.loadData(logId);
   },
 
@@ -69,6 +108,62 @@ Page({
       durationText,
       loading: false
     });
+    
+    // 初始化时间选择器的限制
+    this.updateTimePickerLimits('start', startDate);
+    this.updateTimePickerLimits('end', endDate);
+    
+    console.log('页面加载完成，时间限制已设置:', {
+      startDate: startDate,
+      endDate: endDate,
+      maxDate: this.data.maxDate,
+      maxTime: this.data.maxTime
+    });
+  },
+
+  // 设置最大日期和时间
+  setMaxDateTime: function() {
+    const now = new Date();
+    const maxDate = util.formatDate(now);
+    const maxTime = util.formatClock(now);
+    
+    // 设置一个很早的开始日期（比如2020年）
+    const minDate = '2020-01-01';
+    
+    this.setData({
+      maxDate: maxDate,
+      maxTime: maxTime,
+      minDate: minDate
+    });
+    
+    console.log('设置日期范围:', {
+      minDate: minDate,
+      maxDate: maxDate,
+      maxTime: maxTime
+    });
+  },
+
+  // 更新时间选择器的限制
+  updateTimePickerLimits: function(type, selectedDate) {
+    const isToday = selectedDate === this.data.maxDate;
+    
+    if (type === 'start') {
+      this.setData({
+        startMaxTime: isToday ? this.data.maxTime : '23:59'
+      });
+    } else if (type === 'end') {
+      this.setData({
+        endMaxTime: isToday ? this.data.maxTime : '23:59'
+      });
+    }
+    
+    console.log('更新时间限制:', {
+      type: type,
+      selectedDate: selectedDate,
+      isToday: isToday,
+      startMaxTime: this.data.startMaxTime,
+      endMaxTime: this.data.endMaxTime
+    });
   },
 
   // 选择类别
@@ -87,32 +182,128 @@ Page({
 
   // 选择开始日期
   onStartDateChange: function(e) {
+    const selectedDate = e.detail.value;
+    console.log('选择开始日期:', selectedDate);
+    
+    // 检查是否选择了未来日期
+    if (this.isFutureDate(selectedDate)) {
+      wx.showModal({
+        title: '日期限制',
+        content: '不能选择未来日期，已自动调整为今天',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      
+      // 强制重置为今天的日期
+      const todayDate = this.data.maxDate;
+      this.setData({
+        startDate: todayDate
+      });
+      
+      // 更新时间选择器的限制
+      this.updateTimePickerLimits('start', todayDate);
+      this.updateDurationText();
+      return;
+    }
+    
     this.setData({
-      startDate: e.detail.value
+      startDate: selectedDate
     });
+    
+    // 更新时间选择器的限制
+    this.updateTimePickerLimits('start', selectedDate);
     this.updateDurationText();
   },
 
   // 选择开始时间
   onStartTimeChange: function(e) {
+    const selectedTime = e.detail.value;
+    console.log('选择开始时间:', selectedTime, '当前日期:', this.data.startDate);
+    
+    // 如果选择的是今天，检查是否为未来时间
+    if (this.data.startDate === this.data.maxDate && this.isFutureTime(selectedTime)) {
+      wx.showModal({
+        title: '时间限制',
+        content: '不能选择未来时间，已自动调整为当前时间',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      
+      // 强制重置为当前时间
+      const currentTime = this.data.maxTime;
+      this.setData({
+        startTime: currentTime
+      });
+      this.updateDurationText();
+      return;
+    }
+    
     this.setData({
-      startTime: e.detail.value
+      startTime: selectedTime
     });
     this.updateDurationText();
   },
 
   // 选择结束日期
   onEndDateChange: function(e) {
+    const selectedDate = e.detail.value;
+    console.log('选择结束日期:', selectedDate);
+    
+    // 检查是否选择了未来日期
+    if (this.isFutureDate(selectedDate)) {
+      wx.showModal({
+        title: '日期限制',
+        content: '不能选择未来日期，已自动调整为今天',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      
+      // 强制重置为今天的日期
+      const todayDate = this.data.maxDate;
+      this.setData({
+        endDate: todayDate
+      });
+      
+      // 更新时间选择器的限制
+      this.updateTimePickerLimits('end', todayDate);
+      this.updateDurationText();
+      return;
+    }
+    
     this.setData({
-      endDate: e.detail.value
+      endDate: selectedDate
     });
+    
+    // 更新时间选择器的限制
+    this.updateTimePickerLimits('end', selectedDate);
     this.updateDurationText();
   },
 
   // 选择结束时间
   onEndTimeChange: function(e) {
+    const selectedTime = e.detail.value;
+    console.log('选择结束时间:', selectedTime, '当前日期:', this.data.endDate);
+    
+    // 如果选择的是今天，检查是否为未来时间
+    if (this.data.endDate === this.data.maxDate && this.isFutureTime(selectedTime)) {
+      wx.showModal({
+        title: '时间限制',
+        content: '不能选择未来时间，已自动调整为当前时间',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      
+      // 强制重置为当前时间
+      const currentTime = this.data.maxTime;
+      this.setData({
+        endTime: currentTime
+      });
+      this.updateDurationText();
+      return;
+    }
+    
     this.setData({
-      endTime: e.detail.value
+      endTime: selectedTime
     });
     this.updateDurationText();
   },
@@ -168,17 +359,16 @@ Page({
         this.addMinutesToEnd(60);
         break;
       case 'today':
-        // 设置为今天的时间范围
+        // 设置为今天的时间范围，但结束时间不能超过当前时间
         const todayStart = new Date(now);
         todayStart.setHours(0, 0, 0, 0);
-        const todayEnd = new Date(now);
-        todayEnd.setHours(23, 59, 0, 0);
+        const todayEnd = new Date(now); // 使用当前时间作为结束时间
         
         this.setData({
           startDate: util.formatDate(todayStart),
           startTime: '00:00',
           endDate: util.formatDate(todayEnd),
-          endTime: '23:59'
+          endTime: util.formatClock(todayEnd) // 使用当前时间
         });
         this.updateDurationText();
         break;
@@ -198,6 +388,20 @@ Page({
     
     // 添加分钟
     endDateTime.setMinutes(endDateTime.getMinutes() + minutes);
+    
+    // 检查是否超过当前时间
+    const now = new Date();
+    if (endDateTime > now) {
+      wx.showModal({
+        title: '时间限制',
+        content: '不能设置未来时间，已自动调整为当前时间',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      
+      // 强制设置为当前时间
+      endDateTime.setTime(now.getTime());
+    }
     
     // 更新结束时间
     this.setData({
@@ -238,6 +442,28 @@ Page({
       wx.showToast({
         title: '结束时间必须晚于开始时间',
         icon: 'none'
+      });
+      return;
+    }
+
+    // 验证不能为未来时间
+    const now = new Date();
+    if (startDateTime > now) {
+      wx.showModal({
+        title: '时间限制',
+        content: '开始时间不能为未来时间，请重新选择',
+        showCancel: false,
+        confirmText: '确定'
+      });
+      return;
+    }
+
+    if (endDateTime > now) {
+      wx.showModal({
+        title: '时间限制',
+        content: '结束时间不能为未来时间，请重新选择',
+        showCancel: false,
+        confirmText: '确定'
       });
       return;
     }

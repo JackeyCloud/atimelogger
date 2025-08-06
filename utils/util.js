@@ -68,18 +68,21 @@ const formatNumber = n => {
 /**
  * 格式化持续时间
  * @param {number} duration 持续时间（毫秒）
- * @returns {string} 格式化后的持续时间字符串，格式为 X小时Y分钟
+ * @returns {string} 格式化后的持续时间字符串，格式为 X小时Y分钟 或 Z秒
  */
 const formatDuration = duration => {
-  // 将毫秒转换为分钟
+  // 将毫秒转换为总秒数
+  const totalSeconds = Math.floor(duration / 1000);
   const totalMinutes = Math.floor(duration / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   
   if (hours > 0) {
     return `${hours}小时${minutes}分钟`;
-  } else {
+  } else if (minutes > 0) {
     return `${minutes}分钟`;
+  } else {
+    return `${totalSeconds}秒`;
   }
 };
 

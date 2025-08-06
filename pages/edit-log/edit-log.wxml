@@ -28,18 +28,19 @@
       <!-- 时间选择器 -->
       <view class="form-group">
         <text class="form-label">时间范围</text>
+        <text class="form-tip">⚠️ 系统已自动限制：日期最晚为今天，时间最晚为当前时间</text>
         <view class="time-range-selector">
           <view class="time-range-display">
             <view class="time-point start">
               <view class="time-label">开始</view>
               <view class="datetime-picker improved">
-                <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+                <picker mode="date" value="{{startDate}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onStartDateChange">
                   <view class="date-picker">
                     <text class="date-icon">📅</text>
                     <text>{{startDate}}</text>
                   </view>
                 </picker>
-                <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+                <picker mode="time" value="{{startTime}}" end="{{startMaxTime}}" bindchange="onStartTimeChange">
                   <view class="time-picker">
                     <text class="time-icon">🕒</text>
                     <text>{{startTime}}</text>
@@ -58,13 +59,13 @@
             <view class="time-point end">
               <view class="time-label">结束</view>
               <view class="datetime-picker improved">
-                <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+                <picker mode="date" value="{{endDate}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onEndDateChange">
                   <view class="date-picker">
                     <text class="date-icon">📅</text>
                     <text>{{endDate}}</text>
                   </view>
                 </picker>
-                <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+                <picker mode="time" value="{{endTime}}" end="{{endMaxTime}}" bindchange="onEndTimeChange">
                   <view class="time-picker">
                     <text class="time-icon">🕒</text>
                     <text>{{endTime}}</text>
